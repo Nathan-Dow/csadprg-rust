@@ -47,19 +47,7 @@ fn main_menu(accounts: &mut Vec<Account>){
         println!("[6] Show Interest Computation");
         println!("[0] Exit Program");
 
-        let mut input = String::new();
-        io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read line");
-
-
-        let choice: i32 = match input.trim().parse() {
-            Ok(num) => num,
-            Err(_) => {
-                println!("Invalid input, please enter a number.");
-                continue;
-            }
-        };
+        let choice: u8 = get_number("Choice: ");
 
         if choice == 0 {
             println!("Exiting program...");
@@ -192,8 +180,29 @@ fn print_currency_menu(){
 }
 
 fn currency_exchange() {
-    println!("Foreign Currency Exchange");
-    print_currency_menu();
+    loop{
+        println!("Foreign Currency Exchange");
+        print_currency_menu();
+        
+        let sourceChoice: u8 = get_number("Source Currency: ");
+        let amount: i128  = get_number("Source Amount: ");
+
+        println!("Exchanged Currency Options:");
+        print_currency_menu();
+
+        let exchangeChoice: u8 = get_number("Exchange Currency: ");
+
+        /*
+        Yet to implement the actual currency exchange rates
+         */
+
+        let action = get_input("Convert another currency (Y/N)? . . .");
+        
+        if action.eq_ignore_ascii_case("Y") {
+            break;
+        } 
+    }
+    
 
 }
 
@@ -205,6 +214,16 @@ fn record_exchange_rates() {
 fn show_interest_computation() {
     println!("--- Show Interest Computation ---");
 
+}
+
+fn get_number<T: std::str::FromStr>(prompt: &str) -> T {
+    loop {
+        let input = get_input(prompt);
+        match input.trim().parse::<T>() {
+            Ok(num) => return num,
+            Err(_) => println!("Invalid number, please try again."),
+        }
+    }
 }
 
 fn get_input(prompt: &str) -> String {
