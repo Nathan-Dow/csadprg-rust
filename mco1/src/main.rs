@@ -44,8 +44,8 @@ fn main_menu(){
 
         match choice {
             1 => accounts.push(register_account()),
-            2 => deposit_amount(),
-            3 => withdraw_amount(),
+            2 => deposit_amount(&mut accounts),
+            3 => withdraw_amount(&mut accounts),
             4 => currency_exchange(),
             5 => record_exchange_rates(),
             6 => show_interest_computation(),
@@ -59,7 +59,7 @@ fn register_account() -> Account {
         println!("Register Account Name");
         let name = get_input("Account Name:");
 
-        let action = get_input("Back to the Main Menu (Y/N): ");
+        let action = get_input("\nBack to the Main Menu (Y/N): ");
 
         if action.eq_ignore_ascii_case("Y") {
             return Account {
@@ -73,13 +73,88 @@ fn register_account() -> Account {
 }
 
 
-fn deposit_amount() {
-    println!("--- Deposit Amount ---");
+fn deposit_amount(accounts: &mut Vec<Account>) {
+    if accounts.is_empty() {
+        println!("No accounts available!");
+        return;
+    }
 
+    loop {
+        println!("Deposit Amount");
+        let name = get_input("Account Name:");
+
+        // Find account
+        if let Some(acc) = accounts.iter_mut().find(|a| a.name == name) {
+            println!("Current Balance: {:.2}", acc.balance);
+            println!("Currency: PHP\n");
+
+            let amount_str = get_input("Deposit Amount:");
+            
+            match amount_str.trim().parse::<f64>() {
+                Ok(amount) if amount > 0.0 => {
+                    acc.balance += amount;
+                    println!("Updated Balance: {:.2}", acc.balance);
+                }
+                _ => {
+                    println!("Invalid amount, try again.");
+                    continue;
+                }
+            }
+
+            let action = get_input("Back to the Main Menu (Y/N): ");
+            if action.eq_ignore_ascii_case("Y") {
+                break;
+            } else {
+                println!("Deposit Again...");
+            }
+        } else {
+            println!("Account not found!");
+        }
+    }
 }
 
-fn withdraw_amount() {
-    println!("--- Withdraw Amount ---");
+
+fn withdraw_amount(accounts: &mut Vec<Account>) {
+
+    if accounts.is_empty() {
+        println!("No accounts available!");
+        return;
+    }
+
+    loop {
+        println!("Withdraw Amount");
+        let name = get_input("Account Name:");
+
+        // Find account
+        if let Some(acc) = accounts.iter_mut().find(|a| a.name == name) {
+            println!("Current Balance: {:.2}", acc.balance);
+            println!("Currency: PHP\n");
+
+            let amount_str = get_input("Withdraw Amount:");
+            
+            match amount_str.trim().parse::<f64>() {
+                Ok(amount) if amount < acc.balance => {
+                    acc.balance -= amount;
+                    println!("Updated Balance: {:.2}", acc.balance);
+                }
+                _ => {
+                    println!("Insufficient funds, try again.");
+                    continue;
+                }
+            }
+
+            let action = get_input("Back to the Main Menu (Y/N): ");
+            if action.eq_ignore_ascii_case("Y") {
+                break;
+            } else {
+                println!("Withdraw Again...");
+            }
+        } else {
+            println!("Account not found!");
+        }
+    }
+
+    
 
 }
 
