@@ -1,11 +1,62 @@
 
 use std::io::{self, Write};
 
+// data structure to record exchange rates
+struct ExchangeRates {
+    php: Option<f64>,
+    usd: Option<f64>,
+    jpy: Option<f64>,
+    gbp: Option<f64>,
+    eur: Option<f64>,
+    cny: Option<f64>,
+}
+
+// methods to update the exchange rates
+impl ExchangeRates {
+    fn new() -> Self {
+        ExchangeRates {
+            php: Some(1.0),
+            usd: None,
+            jpy: None,
+            gbp: None,
+            eur: None,
+            cny: None,
+        }
+    }
+
+    fn set_rate(&mut self, code: &str, rate: f64) {
+        match code {
+            "PHP" => self.php = Some(rate),
+            "USD" => self.usd = Some(rate),
+            "JPY" => self.jpy = Some(rate),
+            "GBP" => self.gbp = Some(rate),
+            "EUR" => self.eur = Some(rate),
+            "CNY" => self.cny = Some(rate),
+            _ => println!("Unknown currency code"),
+        }
+    }
+
+    fn get_rate(&self, code: &str) -> Option<f64> {
+        match code {
+            "PHP" => self.php,
+            "USD" => self.usd,
+            "JPY" => self.jpy,
+            "GBP" => self.gbp,
+            "EUR" => self.eur,
+            "CNY" => self.cny,
+            _ => None,
+        }
+    }
+}
+
+
+// data structure for each account
 struct Account {
     name: String,
     balance: f64,
 }
 
+// methods for each account
 impl Account {
     fn new(name: String) -> Self {
         Account { name, balance: 0.0 }
@@ -32,10 +83,11 @@ impl Account {
 
 fn main() {
     let mut accounts: Vec<Account> = Vec::new();
-    main_menu(&mut accounts);
+    let mut rates = ExchangeRates::new();
+    main_menu(&mut accounts, &mut rates);
 }
 
-fn main_menu(accounts: &mut Vec<Account>){
+fn main_menu(accounts: &mut Vec<Account>, rates: &mut ExchangeRates){
 
     loop {
         println!("Select Transaction:");
@@ -59,7 +111,7 @@ fn main_menu(accounts: &mut Vec<Account>){
             2 => deposit_amount(accounts),
             3 => withdraw_amount(accounts),
             4 => currency_exchange(),
-            5 => record_exchange_rates(),
+            5 => record_exchange_rates(rates),
             6 => show_interest_computation(),
             _ => println!("Invalid choice, please try again."),
         }
@@ -184,13 +236,38 @@ fn currency_exchange() {
         println!("Foreign Currency Exchange");
         print_currency_menu();
         
-        let sourceChoice: u8 = get_number("Source Currency: ");
+        let source: u8 = get_number("Source Currency: ");
+        let source_code = match source {
+            1 => "PHP",
+            2 => "USD",
+            3 => "JPY",
+            4 => "GBP",
+            5 => "EUR",
+            6 => "CNY",
+            _ => {
+                println!("Invalid choice.");
+                return;
+            }
+        };
+
         let amount: i128  = get_number("Source Amount: ");
 
         println!("Exchanged Currency Options:");
         print_currency_menu();
 
-        let exchangeChoice: u8 = get_number("Exchange Currency: ");
+        let exchange: u8 = get_number("Exchange Currency: ");
+        let exchange_code = match exchange {
+            1 => "PHP",
+            2 => "USD",
+            3 => "JPY",
+            4 => "GBP",
+            5 => "EUR",
+            6 => "CNY",
+            _ => {
+                println!("Invalid choice.");
+                return;
+            }
+        };
 
         /*
         Yet to implement the actual currency exchange rates
@@ -206,9 +283,39 @@ fn currency_exchange() {
 
 }
 
-fn record_exchange_rates() {
-    println!("--- Record Exchange Rates ---");
+fn record_exchange_rates(rates: &mut ExchangeRates) {
 
+    loop {
+        println!("Record Exchange Rates\n");
+        print_currency_menu();
+
+        
+        let source_choice: u8 = get_number("Select Foreign Currency: ");
+        let code = match source_choice {
+            1 => "PHP",
+            2 => "USD",
+            3 => "JPY",
+            4 => "GBP",
+            5 => "EUR",
+            6 => "CNY",
+            _ => {
+                println!("Invalid choice.");
+                return;
+            }
+        };
+
+        let rate: f64 = get_number("Exchange Rate: ");
+
+        //sets rate for specified currency
+        rates.set_rate(code, rate);
+
+        let action = get_input("Back to the Main Menu (Y/N): ");
+            
+        if action.eq_ignore_ascii_case("Y") {
+            break;
+        } 
+    }
+    
 }
 
 fn show_interest_computation() {
