@@ -110,7 +110,7 @@ fn main_menu(accounts: &mut Vec<Account>, rates: &mut ExchangeRates){
             1 => register_account(accounts),
             2 => deposit_amount(accounts),
             3 => withdraw_amount(accounts),
-            4 => currency_exchange(),
+            4 => currency_exchange(rates),
             5 => record_exchange_rates(rates),
             6 => show_interest_computation(),
             _ => println!("Invalid choice, please try again."),
@@ -222,7 +222,7 @@ fn withdraw_amount(accounts: &mut Vec<Account>) {
 }
 
 fn print_currency_menu(){
-    println!("Source Currency Option:");
+
     println!("[1] Philippine Peso (PHP)");
     println!("[2] United States Dollar (USD)");
     println!("[3] Japanese Yen (JPY)");
@@ -231,9 +231,11 @@ fn print_currency_menu(){
     println!("[6] Chinese Yuan Renminni (CNY)");
 }
 
-fn currency_exchange() {
+fn currency_exchange(rates: &ExchangeRates) {
     loop{
         println!("Foreign Currency Exchange");
+        println!("Source Currency Option:");
+
         print_currency_menu();
         
         let source: u8 = get_number("Source Currency: ");
@@ -250,7 +252,8 @@ fn currency_exchange() {
             }
         };
 
-        let amount: i128  = get_number("Source Amount: ");
+        // provide monetary amount in base currency
+        let amount: f64  = get_number("Source Amount: ");
 
         println!("Exchanged Currency Options:");
         print_currency_menu();
@@ -269,13 +272,31 @@ fn currency_exchange() {
             }
         };
 
-        /*
-        Yet to implement the actual currency exchange rates
-         */
+        if source_code == exchange_code {
+            println!("Source and target currencies are the same");
+            return;
+        }
+
+        let source_rate = rates.get_rate(source_code);
+        let target_rate = rates.get_rate(exchange_code);
+
+        if source_rate.is_none() || target_rate.is_none() {
+            println!("One of the currencies has no recorded rate.");
+            return;
+        }
+
+        let source_rate = source_rate.unwrap();
+        let target_rate = target_rate.unwrap();
+
+        let converted = amount * source_rate / target_rate;
+
+        println!("Exchange Amount: {:.2}", converted);
+
+
 
         let action = get_input("Convert another currency (Y/N)? . . .");
         
-        if action.eq_ignore_ascii_case("Y") {
+        if action.eq_ignore_ascii_case("N") {
             break;
         } 
     }
