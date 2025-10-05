@@ -112,7 +112,7 @@ fn main_menu(accounts: &mut Vec<Account>, rates: &mut ExchangeRates){
             3 => withdraw_amount(accounts),
             4 => currency_exchange(rates),
             5 => record_exchange_rates(rates),
-            6 => show_interest_computation(),
+            6 => show_interest_computation(accounts),
             _ => println!("Invalid choice, please try again."),
         }
     }
@@ -339,8 +339,43 @@ fn record_exchange_rates(rates: &mut ExchangeRates) {
     
 }
 
-fn show_interest_computation() {
-    println!("--- Show Interest Computation ---");
+fn show_interest_computation(accounts: &Vec<Account>) {
+    println!("Show Interest Computation");
+
+    if accounts.is_empty(){
+        println!("No Accounts stored yet");
+        return;
+    }
+
+    loop {
+        let name = get_input("Account Name:");
+        if let Some(acc) = accounts.iter().find(|a| a.name == name) {
+                let mut balance = acc.get_balance();
+                let rate = 0.05;
+                let daily_rate = rate/ 365.0;
+
+                println!("Current Balance: {:.2}", balance);
+                println!("Currency: PHP\n");
+                println!("Interest Rate: 5%");
+
+                let days: u32 = get_number("Total Number of Days: ");
+
+                println!("Day | Interest | Balance |");
+                for day in 1..=days{
+                     let interest = (balance * daily_rate * 100.0).round() / 100.0;
+                    balance = ((balance + interest) * 100.0).round() / 100.0;
+                    println!("{} | {:.2} | {:.2} |", day, interest, balance);
+                }
+        } else {
+            println!("Account not found!");
+        }
+
+        let action = get_input("Back to the Main Menu (Y/N): ");
+                
+        if action.eq_ignore_ascii_case("Y") {
+            break;
+        } 
+    }
 
 }
 
